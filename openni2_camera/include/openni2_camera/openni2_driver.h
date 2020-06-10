@@ -39,8 +39,8 @@
 
 #include <sensor_msgs/msg/image.hpp>
 
-#include <image_transport/image_transport.hpp>
-#include <camera_info_manager/camera_info_manager.hpp>
+#include <image_transport/image_transport.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 #include <string>
 #include <vector>
@@ -72,13 +72,17 @@ private:
   sensor_msgs::msg::CameraInfo::SharedPtr getDepthCameraInfo(int width, int height, rclcpp::Time time) const;
   sensor_msgs::msg::CameraInfo::SharedPtr getProjectorCameraInfo(int width, int height, rclcpp::Time time) const;
 
-  void readConfigFromParameterServer();
-
   // resolves non-URI device IDs to URIs, e.g. '#1' is resolved to the URI of the first device
   std::string resolveDeviceURI(const std::string& device_id) throw(OpenNI2Exception);
   void initDevice();
 
   void advertiseROSTopics();
+
+  // TODO: this is hack around two issues
+  //   First, subscription callbacks do not yet exist in ROS2
+  //   Second, we can't initialize topics in the constructor (shared_from_this doesn't work yet)
+  void periodic();
+  bool initialized_;
 
   void monitorConnection();
   void colorConnectCb();
@@ -88,10 +92,12 @@ private:
   void getSerialCb(const std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Request> request,
                    std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Response> response);
 
+  rcl_interfaces::msg::SetParametersResult paramCb(const std::vector<rclcpp::Parameter> parameters);
+
   void applyConfigToOpenNIDevice();
 
   void genVideoModeTableMap();
-  int lookupVideoModeFromDynConfig(int mode_nr, OpenNI2VideoMode& video_mode);
+  bool lookupVideoMode(const std::string& mode, OpenNI2VideoMode& video_mode);
 
   sensor_msgs::msg::Image::ConstPtr rawToFloatingPointConversion(sensor_msgs::msg::Image::ConstPtr raw_image);
 
@@ -128,7 +134,7 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   /** \brief Camera info manager objects. */
-  boost::shared_ptr<camera_info_manager::CameraInfoManager> color_info_manager_, ir_info_manager_;
+  std::shared_ptr<camera_info_manager::CameraInfoManager> color_info_manager_, ir_info_manager_;
 
   OpenNI2VideoMode ir_video_mode_;
   OpenNI2VideoMode color_video_mode_;
@@ -143,7 +149,7 @@ private:
   bool color_depth_synchronization_;
   bool depth_registration_;
 
-  std::map<int, OpenNI2VideoMode> video_modes_lookup_;
+  std::map<std::string, OpenNI2VideoMode> video_modes_lookup_;
 
   // dynamic reconfigure config
   double depth_ir_offset_x_;
@@ -151,9 +157,9 @@ private:
   int z_offset_mm_;
   double z_scaling_;
 
-  rclcpp::Duration ir_time_offset_;
-  rclcpp::Duration color_time_offset_;
-  rclcpp::Duration depth_time_offset_;
+  double ir_time_offset_;
+  double color_time_offset_;
+  double depth_time_offset_;
 
   int data_skip_;
 

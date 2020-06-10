@@ -12,6 +12,7 @@ find_package(image_transport REQUIRED)
 find_package(openni2_camera_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 
 find_package(PkgConfig)
 pkg_check_modules(PC_OPENNI2 libopenni2)
@@ -66,6 +67,11 @@ ament_target_dependencies(openni2_camera
   rclcpp
 )
 
+rclcpp_components_register_node(openni2_camera
+  PLUGIN "openni2_wrapper::OpenNI2Driver"
+  EXECUTABLE openni2_camera_driver
+)
+
 add_executable(list_devices
    src/list_devices.cpp
 )
@@ -83,20 +89,16 @@ install(
     list_devices
     openni2_wrapper
     openni2_camera
-    #${ADDITIONAL_EXECUTABLES}
+    ${ADDITIONAL_EXECUTABLES}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-#install(DIRECTORY include/${PROJECT_NAME}/
-#  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#)
-
-# add xml file
-#install(FILES openni2_nodelets.xml
-#        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
 
 ament_export_include_directories(include)
 ament_export_libraries(openni2_wrapper)

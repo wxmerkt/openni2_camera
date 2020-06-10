@@ -19,6 +19,7 @@
   <depend>openni2_camera_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
   <depend>image_transport</depend>
 
   <export>
