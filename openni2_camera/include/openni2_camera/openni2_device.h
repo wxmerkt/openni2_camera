@@ -41,7 +41,8 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
-#include <sensor_msgs/Image.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/image.hpp>
 
 #include <string>
 #include <vector>
@@ -57,14 +58,15 @@ class SensorInfo;
 namespace openni2_wrapper
 {
 
-typedef boost::function<void(sensor_msgs::ImagePtr image)> FrameCallbackFunction;
+typedef boost::function<void(sensor_msgs::msg::Image::SharedPtr image)> FrameCallbackFunction;
 
 class OpenNI2FrameListener;
 
 class OpenNI2Device
 {
 public:
-  OpenNI2Device(const std::string& device_URI) throw (OpenNI2Exception);
+  OpenNI2Device(const std::string& device_URI,
+                rclcpp::Node* node) throw (OpenNI2Exception);
   virtual ~OpenNI2Device();
 
   const std::string getUri() const;

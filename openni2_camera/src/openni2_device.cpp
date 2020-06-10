@@ -48,7 +48,8 @@
 namespace openni2_wrapper
 {
 
-OpenNI2Device::OpenNI2Device(const std::string& device_URI) throw (OpenNI2Exception) :
+OpenNI2Device::OpenNI2Device(const std::string& device_URI,
+                             rclcpp::Node* node) throw (OpenNI2Exception) :
     openni_device_(),
     ir_video_started_(false),
     color_video_started_(false),
@@ -77,9 +78,9 @@ OpenNI2Device::OpenNI2Device(const std::string& device_URI) throw (OpenNI2Except
   device_info_ = boost::make_shared<openni::DeviceInfo>();
   *device_info_ = openni_device_->getDeviceInfo();
 
-  ir_frame_listener = boost::make_shared<OpenNI2FrameListener>();
-  color_frame_listener = boost::make_shared<OpenNI2FrameListener>();
-  depth_frame_listener = boost::make_shared<OpenNI2FrameListener>();
+  ir_frame_listener = boost::make_shared<OpenNI2FrameListener>(node);
+  color_frame_listener = boost::make_shared<OpenNI2FrameListener>(node);
+  depth_frame_listener = boost::make_shared<OpenNI2FrameListener>(node);
 
 }
 

@@ -37,13 +37,10 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.hpp>
 
-#include <dynamic_reconfigure/server.h>
-#include <openni2_camera/OpenNI2Config.h>
-
-#include <image_transport/image_transport.h>
-#include <camera_info_manager/camera_info_manager.h>
+#include <image_transport/image_transport.hpp>
+#include <camera_info_manager/camera_info_manager.hpp>
 
 #include <string>
 #include <vector>
@@ -51,32 +48,29 @@
 #include "openni2_camera/openni2_device_manager.h"
 #include "openni2_camera/openni2_device.h"
 #include "openni2_camera/openni2_video_mode.h"
-#include "openni2_camera/GetSerial.h"
+#include "openni2_camera_msgs/srv/get_serial.hpp"
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace openni2_wrapper
 {
 
-class OpenNI2Driver
+class OpenNI2Driver : public rclcpp::Node
 {
 public:
-  OpenNI2Driver(ros::NodeHandle& n, ros::NodeHandle& pnh) ;
+  OpenNI2Driver(const rclcpp::NodeOptions & node_options);
 
 private:
-  typedef openni2_camera::OpenNI2Config Config;
-  typedef dynamic_reconfigure::Server<Config> ReconfigureServer;
-
-  void newIRFrameCallback(sensor_msgs::ImagePtr image);
-  void newColorFrameCallback(sensor_msgs::ImagePtr image);
-  void newDepthFrameCallback(sensor_msgs::ImagePtr image);
+  void newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
+  void newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
+  void newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
 
   // Methods to get calibration parameters for the various cameras
-  sensor_msgs::CameraInfoPtr getDefaultCameraInfo(int width, int height, double f) const;
-  sensor_msgs::CameraInfoPtr getColorCameraInfo(int width, int height, ros::Time time) const;
-  sensor_msgs::CameraInfoPtr getIRCameraInfo(int width, int height, ros::Time time) const;
-  sensor_msgs::CameraInfoPtr getDepthCameraInfo(int width, int height, ros::Time time) const;
-  sensor_msgs::CameraInfoPtr getProjectorCameraInfo(int width, int height, ros::Time time) const;
+  sensor_msgs::msg::CameraInfo::SharedPtr getDefaultCameraInfo(int width, int height, double f) const;
+  sensor_msgs::msg::CameraInfo::SharedPtr getColorCameraInfo(int width, int height, rclcpp::Time time) const;
+  sensor_msgs::msg::CameraInfo::SharedPtr getIRCameraInfo(int width, int height, rclcpp::Time time) const;
+  sensor_msgs::msg::CameraInfo::SharedPtr getDepthCameraInfo(int width, int height, rclcpp::Time time) const;
+  sensor_msgs::msg::CameraInfo::SharedPtr getProjectorCameraInfo(int width, int height, rclcpp::Time time) const;
 
   void readConfigFromParameterServer();
 
@@ -86,21 +80,20 @@ private:
 
   void advertiseROSTopics();
 
-  void monitorConnection(const ros::TimerEvent& event);
+  void monitorConnection();
   void colorConnectCb();
   void depthConnectCb();
   void irConnectCb();
 
-  bool getSerialCb(openni2_camera::GetSerialRequest& req, openni2_camera::GetSerialResponse& res);
-
-  void configCb(Config &config, uint32_t level);
+  void getSerialCb(const std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Request> request,
+                   std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Response> response);
 
   void applyConfigToOpenNIDevice();
 
   void genVideoModeTableMap();
   int lookupVideoModeFromDynConfig(int mode_nr, OpenNI2VideoMode& video_mode);
 
-  sensor_msgs::ImageConstPtr rawToFloatingPointConversion(sensor_msgs::ImageConstPtr raw_image);
+  sensor_msgs::msg::Image::ConstPtr rawToFloatingPointConversion(sensor_msgs::msg::Image::ConstPtr raw_image);
 
   void setIRVideoMode(const OpenNI2VideoMode& ir_video_mode);
   void setColorVideoMode(const OpenNI2VideoMode& color_video_mode);
@@ -110,9 +103,6 @@ private:
   bool isConnected() const;
 
   void forceSetExposure();
-
-  ros::NodeHandle& nh_;
-  ros::NodeHandle& pnh_;
 
   boost::shared_ptr<OpenNI2DeviceManager> device_manager_;
   boost::shared_ptr<OpenNI2Device> device_;
@@ -124,11 +114,7 @@ private:
   bool enable_reconnect_;
 
   /** \brief get_serial server*/
-  ros::ServiceServer get_serial_server;
-
-  /** \brief reconfigure server*/
-  boost::shared_ptr<ReconfigureServer> reconfigure_server_;
-  bool config_init_;
+  rclcpp::Service<openni2_camera_msgs::srv::GetSerial>::SharedPtr get_serial_server;
 
   boost::mutex connect_mutex_;
   // published topics
@@ -136,10 +122,10 @@ private:
   image_transport::CameraPublisher pub_depth_;
   image_transport::CameraPublisher pub_depth_raw_;
   image_transport::CameraPublisher pub_ir_;
-  ros::Publisher pub_projector_info_;
+  rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr pub_projector_info_;
 
   /** \brief timer for connection monitoring thread */
-  ros::Timer timer_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   /** \brief Camera info manager objects. */
   boost::shared_ptr<camera_info_manager::CameraInfoManager> color_info_manager_, ir_info_manager_;
@@ -165,9 +151,9 @@ private:
   int z_offset_mm_;
   double z_scaling_;
 
-  ros::Duration ir_time_offset_;
-  ros::Duration color_time_offset_;
-  ros::Duration depth_time_offset_;
+  rclcpp::Duration ir_time_offset_;
+  rclcpp::Duration color_time_offset_;
+  rclcpp::Duration depth_time_offset_;
 
   int data_skip_;
 
@@ -186,8 +172,6 @@ private:
   bool projector_info_subscribers_;
 
   bool use_device_time_;
-
-  Config old_config_;
 };
 
 }
