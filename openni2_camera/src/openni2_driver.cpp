@@ -134,6 +134,7 @@ void OpenNI2Driver::periodic()
 
     // Register parameter callback
     this->set_on_parameters_set_callback(std::bind(&OpenNI2Driver::paramCb, this, std::placeholders::_1));
+    initialized_ = true;
   }
 
   // TODO: check subscriber counts, enable cameras
@@ -159,7 +160,7 @@ void OpenNI2Driver::advertiseROSTopics()
   // Asus Xtion PRO does not have an RGB camera
   if (device_->hasColorSensor())
   {
-    pub_color_ = it.advertiseCamera("rgb/image", 1);
+    pub_color_ = it.advertiseCamera("rgb/image_raw", 1);
   }
 
   if (device_->hasIRSensor())
@@ -262,13 +263,15 @@ void OpenNI2Driver::applyConfigToOpenNIDevice()
   setColorVideoMode(color_video_mode_);
   setDepthVideoMode(depth_video_mode_);
 
-/*
   if (device_->isImageRegistrationModeSupported())
   {
     try
     {
-      if (!config_init_ || (old_config_.depth_registration != depth_registration_))
+      //if (!config_init_ || (old_config_.depth_registration != depth_registration_))
+      if (depth_registration_)
+      {
         device_->setImageRegistrationMode(depth_registration_);
+      }
     }
     catch (const OpenNI2Exception& exception)
     {
@@ -278,7 +281,8 @@ void OpenNI2Driver::applyConfigToOpenNIDevice()
 
   try
   {
-    if (!config_init_ || (old_config_.color_depth_synchronization != color_depth_synchronization_))
+    //if (!config_init_ || (old_config_.color_depth_synchronization != color_depth_synchronization_))
+    if (color_depth_synchronization_)
       device_->setDepthColorSync(color_depth_synchronization_);
   }
   catch (const OpenNI2Exception& exception)
@@ -288,7 +292,8 @@ void OpenNI2Driver::applyConfigToOpenNIDevice()
 
   try
   {
-    if (!config_init_ || (old_config_.auto_exposure != auto_exposure_))
+    //if (!config_init_ || (old_config_.auto_exposure != auto_exposure_))
+    if (auto_exposure_)
       device_->setAutoExposure(auto_exposure_);
   }
   catch (const OpenNI2Exception& exception)
@@ -298,7 +303,8 @@ void OpenNI2Driver::applyConfigToOpenNIDevice()
 
   try
   {
-    if (!config_init_ || (old_config_.auto_white_balance != auto_white_balance_))
+    //if (!config_init_ || (old_config_.auto_white_balance != auto_white_balance_))
+    if (auto_white_balance_)
       device_->setAutoWhiteBalance(auto_white_balance_);
   }
   catch (const OpenNI2Exception& exception)
@@ -319,15 +325,14 @@ void OpenNI2Driver::applyConfigToOpenNIDevice()
     // Setting the exposure the old way, although this should not have an effect
     try
     {
-      if (!config_init_ || (old_config_.exposure != exposure_))
-        device_->setExposure(exposure_);
+      //if (!config_init_ || (old_config_.exposure != exposure_))
+      device_->setExposure(exposure_);
     }
     catch (const OpenNI2Exception& exception)
     {
       RCLCPP_ERROR(this->get_logger(), "Could not set exposure. Reason: %s", exception.what());
     }
   }
-  */
 
   device_->setUseDeviceTimer(use_device_time_);
 }
@@ -367,7 +372,8 @@ void OpenNI2Driver::colorConnectCb()
 
   // This does not appear to work
   // color_subscribers_ = pub_color_.getNumSubscribers() > 0;
-  color_subscribers_ = this->count_subscribers("rgb/image") > 0 ||
+  // TODO: make this work with remapping!
+  color_subscribers_ = this->count_subscribers("rgb/image_raw") > 0 ||
                        this->count_subscribers("rgb/camera_info") > 0;
 
   if (color_subscribers_ && !device_->isColorStreamStarted())
