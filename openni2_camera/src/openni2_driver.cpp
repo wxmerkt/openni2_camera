@@ -431,8 +431,7 @@ void OpenNI2Driver::depthConnectCb()
   // depth_raw_subscribers_ = pub_depth_raw_.getNumSubscribers() > 0;
   depth_subscribers_ = this->count_subscribers("depth/image") > 0 ||
                        this->count_subscribers("depth/camera_info") > 0;
-  depth_raw_subscribers_ = this->count_subscribers("depth_raw/image") > 0 ||
-                           this->count_subscribers("depth_raw/camera_info") > 0;
+  depth_raw_subscribers_ = this->count_subscribers("depth/image_raw") > 0;
   projector_info_subscribers_ = pub_projector_info_->get_subscription_count() > 0;
 
   bool need_depth = depth_subscribers_ || depth_raw_subscribers_;
@@ -496,7 +495,7 @@ void OpenNI2Driver::newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
     if (ir_subscribers_)
     {
       image->header.frame_id = ir_frame_id_;
-      //image->header.stamp = image->header.stamp + ir_time_offset_;
+      image->header.stamp = rclcpp::Time(image->header.stamp) + rclcpp::Duration(ir_time_offset_ / 1e9);
 
       pub_ir_.publish(image, getIRCameraInfo(image->width, image->height, image->header.stamp));
     }
@@ -512,7 +511,7 @@ void OpenNI2Driver::newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr ima
     if (color_subscribers_)
     {
       image->header.frame_id = color_frame_id_;
-      //image->header.stamp = image->header.stamp + color_time_offset_;
+      image->header.stamp = rclcpp::Time(image->header.stamp) + rclcpp::Duration(color_time_offset_ / 1e9);
 
       pub_color_.publish(image, getColorCameraInfo(image->width, image->height, image->header.stamp));
     }
@@ -528,7 +527,7 @@ void OpenNI2Driver::newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr ima
 
     if (depth_raw_subscribers_||depth_subscribers_||projector_info_subscribers_)
     {
-      //image->header.stamp = image->header.stamp + depth_time_offset_;
+      image->header.stamp = rclcpp::Time(image->header.stamp) + rclcpp::Duration(depth_time_offset_ / 1e9);
 
       if (z_offset_mm_ != 0)
       {
@@ -572,7 +571,7 @@ void OpenNI2Driver::newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr ima
       // Projector "info" probably only useful for working with disparity images
       if (projector_info_subscribers_)
       {
-        //pub_projector_info_->publish(getProjectorCameraInfo(image->width, image->height, image->header.stamp));
+        pub_projector_info_->publish(*getProjectorCameraInfo(image->width, image->height, image->header.stamp));
       }
     }
   }
@@ -807,9 +806,8 @@ std::string OpenNI2Driver::resolveDeviceURI(const std::string& device_id) throw(
     }
     if (match_found)
       return matched_uri;
-    else
-      return "INVALID";
   }
+  return "INVALID";
 }
 
 void OpenNI2Driver::initDevice()
