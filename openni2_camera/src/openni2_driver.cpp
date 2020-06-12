@@ -482,6 +482,12 @@ void OpenNI2Driver::irConnectCb()
 
 void OpenNI2Driver::newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
 {
+  if (!rclcpp::ok())
+  {
+    // Don't publish to invalid publishers
+    return;
+  }
+
   if ((++data_skip_ir_counter_)%data_skip_==0)
   {
     data_skip_ir_counter_ = 0;
@@ -498,6 +504,12 @@ void OpenNI2Driver::newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
 
 void OpenNI2Driver::newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
 {
+  if (!rclcpp::ok())
+  {
+    // Don't publish to invalid publishers
+    return;
+  }
+
   if ((++data_skip_color_counter_)%data_skip_==0)
   {
     data_skip_color_counter_ = 0;
@@ -514,6 +526,12 @@ void OpenNI2Driver::newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr ima
 
 void OpenNI2Driver::newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
 {
+  if (!rclcpp::ok())
+  {
+    // Don't publish to invalid publishers
+    return;
+  }
+
   if ((++data_skip_depth_counter_)%data_skip_==0)
   {
 
