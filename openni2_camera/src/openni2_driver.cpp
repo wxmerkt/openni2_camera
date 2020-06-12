@@ -371,10 +371,7 @@ void OpenNI2Driver::colorConnectCb()
   boost::lock_guard<boost::mutex> lock(connect_mutex_);
 
   // This does not appear to work
-  // color_subscribers_ = pub_color_.getNumSubscribers() > 0;
-  // TODO: make this work with remapping!
-  color_subscribers_ = this->count_subscribers("rgb/image_raw") > 0 ||
-                       this->count_subscribers("rgb/camera_info") > 0;
+  color_subscribers_ = pub_color_.getNumSubscribers() > 0;
 
   if (color_subscribers_ && !device_->isColorStreamStarted())
   {
@@ -427,11 +424,8 @@ void OpenNI2Driver::depthConnectCb()
   boost::lock_guard<boost::mutex> lock(connect_mutex_);
 
   // These does not appear to work
-  // depth_subscribers_ = pub_depth_.getNumSubscribers() > 0;
-  // depth_raw_subscribers_ = pub_depth_raw_.getNumSubscribers() > 0;
-  depth_subscribers_ = this->count_subscribers("depth/image") > 0 ||
-                       this->count_subscribers("depth/camera_info") > 0;
-  depth_raw_subscribers_ = this->count_subscribers("depth/image_raw") > 0;
+  depth_subscribers_ = pub_depth_.getNumSubscribers() > 0;
+  depth_raw_subscribers_ = pub_depth_raw_.getNumSubscribers() > 0;
   projector_info_subscribers_ = pub_projector_info_->get_subscription_count() > 0;
 
   bool need_depth = depth_subscribers_ || depth_raw_subscribers_;
