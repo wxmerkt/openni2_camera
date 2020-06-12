@@ -100,6 +100,11 @@ install(
   DESTINATION include
 )
 
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(openni2_wrapper)
 ament_export_dependencies(
