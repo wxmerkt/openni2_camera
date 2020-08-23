@@ -36,3 +36,4 @@ ros2 launch openni2_camera camera_with_cloud.launch.py
  * There are currently no subscriber connect/disconnect callbacks in ROS2.
    This package implements a lazy publisher by running a 1Hz update loop
    and seeing if there are new subscribers.
+ * Using "use_device_time" is currently broken.
