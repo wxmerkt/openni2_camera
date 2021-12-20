@@ -39,8 +39,8 @@
 
 #include <sensor_msgs/msg/image.hpp>
 
-#include <image_transport/image_transport.h>
-#include <camera_info_manager/camera_info_manager.h>
+#include <image_transport/image_transport.hpp>
+#include <camera_info_manager/camera_info_manager.hpp>
 
 #include <string>
 #include <vector>
@@ -73,7 +73,7 @@ private:
   sensor_msgs::msg::CameraInfo::SharedPtr getProjectorCameraInfo(int width, int height, rclcpp::Time time) const;
 
   // resolves non-URI device IDs to URIs, e.g. '#1' is resolved to the URI of the first device
-  std::string resolveDeviceURI(const std::string& device_id) throw(OpenNI2Exception);
+  std::string resolveDeviceURI(const std::string& device_id);
   void initDevice();
 
   void advertiseROSTopics();

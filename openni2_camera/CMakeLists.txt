@@ -55,6 +55,7 @@ ament_target_dependencies(openni2_wrapper
 add_library(openni2_camera SHARED
   src/openni2_driver.cpp
 )
+target_compile_options(openni2_camera PUBLIC -Wno-deprecated-declarations)
 target_link_libraries(openni2_camera
   openni2_wrapper
   ${Boost_LIBRARIE}
