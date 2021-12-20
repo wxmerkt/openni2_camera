@@ -32,7 +32,7 @@
 #include "openni2_camera/openni2_convert.h"
 #include "openni2_camera/openni2_exception.h"
 
-#include <boost/make_shared.hpp>
+
 
 #include <string>
 

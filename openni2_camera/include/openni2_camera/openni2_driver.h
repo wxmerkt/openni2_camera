@@ -32,7 +32,7 @@
 #ifndef OPENNI2_DRIVER_H
 #define OPENNI2_DRIVER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>

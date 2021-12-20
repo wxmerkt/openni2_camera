@@ -40,8 +40,8 @@
 #include "openni2_camera/openni2_convert.h"
 #include "openni2_camera/openni2_frame_listener.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
+
 
 #include <string>
 
