@@ -110,8 +110,8 @@ private:
 
   void forceSetExposure();
 
-  boost::shared_ptr<OpenNI2DeviceManager> device_manager_;
-  boost::shared_ptr<OpenNI2Device> device_;
+  std::shared_ptr<OpenNI2DeviceManager> device_manager_;
+  std::shared_ptr<OpenNI2Device> device_;
 
   std::string device_id_;
   int bus_id_;

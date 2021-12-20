@@ -43,7 +43,7 @@ namespace openni2_wrapper
 
 OpenNI2Driver::OpenNI2Driver(const rclcpp::NodeOptions & node_options) :
     Node("openni2_camera", node_options),
-    device_manager_(OpenNI2DeviceManager::getSingelton()),
+    device_manager_(OpenNI2DeviceManager::getSingleton()),
     data_skip_ir_counter_(0),
     data_skip_color_counter_(0),
     data_skip_depth_counter_ (0),
@@ -713,7 +713,7 @@ std::string OpenNI2Driver::resolveDeviceURI(const std::string& device_id)
 {
   // retrieve available device URIs, they look like this: "1d27/0601@1/5"
   // which is <vendor ID>/<product ID>@<bus number>/<device number>
-  boost::shared_ptr<std::vector<std::string> > available_device_URIs =
+  std::shared_ptr<std::vector<std::string> > available_device_URIs =
     device_manager_->getConnectedDeviceURIs();
 
   // look for '#<number>' format
@@ -870,7 +870,7 @@ bool OpenNI2Driver::isConnected() const
   // TODO: The current isConnected logic assumes that there is only one sensor
   // on the bus of interest.  In the future, we could compare serial numbers
   // to make certain the same camera as been re-connected.
-  boost::shared_ptr<std::vector<std::string> > list =
+  std::shared_ptr<std::vector<std::string> > list =
       device_manager_->getConnectedDeviceURIs();
   for (std::size_t i = 0; i != list->size(); ++i)
   {

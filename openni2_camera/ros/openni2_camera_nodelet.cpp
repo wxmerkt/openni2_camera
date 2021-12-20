@@ -48,7 +48,7 @@ private:
     lp.reset(new openni2_wrapper::OpenNI2Driver(getNodeHandle(), getPrivateNodeHandle()));
   };
 
-  boost::shared_ptr<openni2_wrapper::OpenNI2Driver> lp;
+  std::shared_ptr<openni2_wrapper::OpenNI2Driver> lp;
 };
 
 }

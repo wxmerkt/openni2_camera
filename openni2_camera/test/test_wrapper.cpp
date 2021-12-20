@@ -66,11 +66,11 @@ int main()
 
   std::cout << device_manager;
 
-  boost::shared_ptr<std::vector<std::string> > device_uris = device_manager.getConnectedDeviceURIs();
+  std::shared_ptr<std::vector<std::string> > device_uris = device_manager.getConnectedDeviceURIs();
 
   BOOST_FOREACH(const std::string& uri, *device_uris)
   {
-    boost::shared_ptr<OpenNI2Device> device = device_manager.getDevice(uri);
+    std::shared_ptr<OpenNI2Device> device = device_manager.getDevice(uri);
 
     std::cout << *device;
 
